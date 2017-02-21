@@ -257,7 +257,7 @@ def pick_year( year):    # 2016 for the season 15-16, 2015 for 14-15 # till 1977
     
     year_tab = np.column_stack(( year_list ,tab_for_xpath))
     
-    a = year_list.index(2016)
+    a = year_list.index(year)
 
     i = year_tab[a][1]
     
