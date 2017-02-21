@@ -2,7 +2,7 @@
  Applied Econometrics
  Scraping the data
  
- Websites used:
+ Website used:
      Basketball reference
      
 """
