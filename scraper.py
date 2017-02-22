@@ -1,22 +1,11 @@
+# -*- coding: utf-8 -*-
 """
  Applied Econometrics
- Scraping the data
+ Collecting data
  
- Website used:
+ Website scraped:
      Basketball reference
      
-"""
-####### PRECISION #######
-"""
-Une fois l'algorithme lancé, il ne faut pas passer le curseur sur le nouveau navigateur Chrome.
-Cela risque de fausser le processus d'extraction
-
-Dans le cas où le curseur est passé, par inadvertance, sur le navigateur Chrome et que le processus s'est arrêté,
-il faut regarder à quel match le processus s'est arrêté.
-
-{ A continuer }
-
-
 """
 
 import selenium
@@ -36,11 +25,6 @@ import os
 path = 'C:\\Users\\namhe\\Documents\\\M1\\Applied\\Project\\Data'
 os.chdir(path)
 
-
-######################################
-
-### Ouvrir des pages web
-
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 
@@ -54,7 +38,7 @@ from selenium.webdriver.common.action_chains import ActionChains
 # Exception
 from selenium.common.exceptions import NoSuchElementException
 
-
+# Open Chrome browser
 driver = webdriver.Chrome()
 driver.implicitly_wait(5) # open the browser within 5sec
 
@@ -65,12 +49,11 @@ driver.get(url)
 
 ########## Functions ################
 
-
 def get_boxscore( row, month):
     global game
     ind = str(row)
         
-    time.sleep( round(rd.uniform(0.7, 1.2),3 ))
+    time.sleep( round(rd.uniform(0.7, 1.1),3 ))
                 
     bs_xpath ='//*[@id="schedule"]/tbody/tr['+ind+']/td[6]/a'
     driver.find_element_by_xpath(bs_xpath).click()# getting access to the boxscore row
@@ -113,7 +96,7 @@ def get_boxscore( row, month):
     #team1_bbs.click()
                 
     # Get table as CSV
-    time.sleep(round(rd.uniform(0.4,1.2) , 3))
+    time.sleep(round(rd.uniform(0.4,1.1) , 3))
     driver.implicitly_wait(5)
                 
     team1bas_xpath_tocsv = '//*[@id="all_box_'+team1+'_basic"]/div[1]/div/ul/li[1]/div/ul/li[3]/button'
@@ -147,7 +130,7 @@ def get_boxscore( row, month):
     #team1_abs.click()
                 
     # Get table as CSV
-    time.sleep(round(rd.uniform(0.4,1.2) , 3))
+    time.sleep(round(rd.uniform(0.4,1.1) , 3))
     driver.implicitly_wait(5)
                 
     team1adv_xpath_tocsv = '//*[@id="all_box_'+team1+'_advanced"]/div[1]/div/ul/li[1]/div/ul/li[3]/button'
@@ -182,7 +165,7 @@ def get_boxscore( row, month):
     #team2_bbs.click()
                 
     # Get table as CSV
-    time.sleep(round(rd.uniform(0.4,1.2) , 3))
+    time.sleep(round(rd.uniform(0.4,1.1) , 3))
     driver.implicitly_wait(5)
                 
     team2bas_xpath_tocsv = '//*[@id="all_box_'+team2+'_basic"]/div[1]/div/ul/li[1]/div/ul/li[3]/button'
@@ -217,7 +200,7 @@ def get_boxscore( row, month):
     #team2_abs.click()
                 
     # Get table as CSV
-    time.sleep(round(rd.uniform(0.4,1.3) , 3))
+    time.sleep(round(rd.uniform(0.4,1.1) , 3))
     driver.implicitly_wait(5)
     team2adv_xpath_tocsv = '//*[@id="all_box_'+team2+'_advanced"]/div[1]/div/ul/li[1]/div/ul/li[3]/button'
     driver.find_element_by_xpath(team2adv_xpath_tocsv).click()
@@ -238,14 +221,18 @@ def get_boxscore( row, month):
     wr = csv.writer(myfile, delimiter=',', lineterminator='\r\n')
     wr.writerows( [x.split(',') for x in list] )
     myfile.close()
-          
-    # Wait pour pas se faire pécho ^^'
         
-    time.sleep(round(rd.uniform(0.4,1) , 3))
+    time.sleep(round(rd.uniform(0.4,0.9) , 3))
     print( 'row ='+ind,'Game number '+str(game))
     driver.back()
     
+    ######################################################## timeout
     
+    
+# Get boxscores for the entire month
+def get_boxscores( start, total, month):
+    for i in range(start, total+1):
+        get_boxscore( i , month)
     
     
 # Select the season and click on it
@@ -255,36 +242,34 @@ def pick_year( year):    # 2016 for the season 15-16, 2015 for 14-15 # till 1977
     
     year_list = sorted([i for i in range(1977,2018)], reverse = True)# sorting in ascending order
     
-    year_tab = np.column_stack(( year_list ,tab_for_xpath))
-    
-    a = year_list.index(year)
-
-    i = year_tab[a][1]
-    
-    time.sleep(round(rd.uniform(0.8,1.5) , 3))
-    
-    
-    ind = str(i)
-    
-    season_xpath='//*[@id="stats_clone"]/tbody/tr['+ind+']/th/a'
-    driver.find_element_by_xpath(season_xpath).click()
+    if year in year_list:
+        year_tab = np.column_stack(( year_list ,tab_for_xpath))
         
+        a = year_list.index(year)
+        i = year_tab[a][1] #in order to get the row associated to the year
+    
+        time.sleep(round(rd.uniform(0.8,1.5) , 3))
+    
+        ind = str(i)
+    
+        season_xpath='//*[@id="stats_clone"]/tbody/tr['+ind+']/th/a'
+        driver.find_element_by_xpath(season_xpath).click()
+    else:
+        print('Choose a year between 1977 and 2018')
     
     
     
 #################################################
 
+game = 0 #game number initialisation
 
 # Select the season
-
-pick_year(2016)
-
-game = 0 #game number initialisation!
+pick_year(2013) 
     
 season = driver.current_url[-9:-5]
     
 # Create season folder
-newpath = path+'\\'+str(season)
+newpath = path+'\\'+season
 if not os.path.exists(newpath):
     os.makedirs(newpath)
         
@@ -301,8 +286,7 @@ nbmonth = len(nbmonth)
 tillApril = nbmonth-2
     
 
-# 1st month games
-
+# 1st month games    
 #Create month folder
 month = driver.find_element_by_xpath('//*[@id="content"]/div[2]/div[1]/a').text
 newpath = path+'\\'+str(season)+'\\'+month
@@ -313,42 +297,40 @@ if not os.path.exists(newpath):
 nbrows = driver.find_elements_by_xpath('//*[@id="schedule"]/tbody/tr')
 nbrows = len(nbrows)  
         
-for row in range(1, nbrows+1):
-    get_boxscore( row , month)
+get_boxscores(1, nbrows, month)
     
-    
-    
+        
 # Other months but April     
-for mois in range(4,5):#,tillApril):
-    mois = 4
+for mois in range(4,tillApril):
     m = str(mois)
+    driver.implicitly_wait(4)
+    
     month_xpath = '//*[@id="content"]/div[2]/div['+m+']/a'        
     month = driver.find_element_by_xpath(month_xpath).text
         
-    newpath = path+'\\'+str(season)+'\\'+month
+    newpath = path+'\\'+season+'\\'+month
     if not os.path.exists(newpath):
         os.makedirs(newpath)
         
-    time.sleep(round(rd.uniform(0.4,3) , 3))
-    driver.implicitly_wait(4)
-         
-    ind_month = str(mois)
+    time.sleep(round(rd.uniform(0.4,1.5) , 3))
         
-    month_xpath = '//*[@id="content"]/div[2]/div['+ind_month+']/a'
+    month_xpath = '//*[@id="content"]/div[2]/div['+m+']/a'
     driver.find_element_by_xpath(month_xpath).click()
             
     driver.implicitly_wait(5)
     nbrows = driver.find_elements_by_xpath('//*[@id="schedule"]/tbody/tr')
     nbrows = len(nbrows)
         
-    for row in range(1, nbrows+1):
-        get_boxscore( row , month)
-            
-            
-# April games
-time.sleep(round(rd.uniform(0.6,1.3) , 3))
+    get_boxscores(1 , nbrows, month)
     
-newpath = path+'\\'+str(season)+'\\April'
+    driver.implicitly_wait(4)
+    
+    driver.execute_script("window.scrollTo(0, 10);")
+
+# April
+time.sleep(round(rd.uniform(0.6,1.2) , 3))
+    
+newpath = path+'\\'+season+'\\April'
 if not os.path.exists(newpath):
     os.makedirs(newpath)
     
@@ -369,4 +351,4 @@ for row in range(1, nbrows + 1):
     except NoSuchElementException:
         break
         
-   
+    
