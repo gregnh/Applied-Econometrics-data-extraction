@@ -22,8 +22,9 @@ import csv
 import time
 import os
 
-path = 'C:\\Users\\namhe\\Documents\\\M1\\Applied\\Project\\Data'
+path = 'C:\\Users\\SELECT\\YOUR\\\WORKING\\DIRECTORY'
 os.chdir(path)
+
 
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
@@ -38,26 +39,36 @@ from selenium.webdriver.common.action_chains import ActionChains
 # Exception
 from selenium.common.exceptions import NoSuchElementException
 
-# Open Chrome browser
-driver = webdriver.Chrome()
-driver.implicitly_wait(5) # open the browser within 5sec
 
 
-url='http://www.basketball-reference.com/leagues'
-driver.get(url)
+####### PRECISION #######
+"""
+Une fois que tu as lancé l'algo, ne passe pas ta souris sur la nouvelle fenetre chrome.
 
+Sinon ca va fucked up le processus.
+
+Reduis là pour éviter ce risque.
+
+Puis attends.
+
+Dans le cas où tu as trainé ta souris sur dans la fenetre Chrome par inadvertence (orthographe?),
+CALL ME ILL EXPLAIN YOU
+"""
 
 ########## Functions ################
+
 
 def get_boxscore( row, month):
     global game
     ind = str(row)
         
-    time.sleep( round(rd.uniform(0.7, 1.1),3 ))
+    time.sleep( round(rd.uniform(0.7, 1),3 ))
                 
     bs_xpath ='//*[@id="schedule"]/tbody/tr['+ind+']/td[6]/a'
     driver.find_element_by_xpath(bs_xpath).click()# getting access to the boxscore row
-
+    
+    #driver.manage().timeouts().implicitlyWait(15, TimeUnit.SECONDS) #stop loading after 20sec
+    
     game += 1 #Game number x of the season
 
     driver.implicitly_wait(5)   
@@ -81,7 +92,7 @@ def get_boxscore( row, month):
     name2 = driver.find_element_by_xpath('//*[@id="all_box_'+team2+'_basic"]/div[1]/h2').text 
 
     # Create folder 
-    newpath = path+'\\'+str(season)+'\\'+month+'\\'+'Game '+str(game)+' - '+name1+'_v_'+name2
+    newpath = path+'\\'+season+'\\'+month+'\\'+'Game '+str(game)+' - '+name1+'_v_'+name2
     if not os.path.exists(newpath):
         os.makedirs(newpath)
     # Team 1
@@ -112,7 +123,7 @@ def get_boxscore( row, month):
     list = team1_csv_bas.split('\n')
         
         
-    filename = 'Game'+str(game)+'_'+str(date)+'_'+team1+'_bas'
+    filename = date+'_'+'Game'+str(game)+'_'+team1+'_bas'
     newpath1 = newpath+'\\'+filename+'.csv'    
     myfile=  open(newpath1, mode = 'w') # 'w' for writing 
     wr = csv.writer(myfile, delimiter=',', lineterminator='\r\n')
@@ -146,7 +157,7 @@ def get_boxscore( row, month):
     list = team1_csv_adv.split('\n')
     
     
-    filename = 'Game'+str(game)+'_'+str(date)+'_'+team1+'_adv'
+    filename = date+'_'+'Game'+str(game)+'_'+team1+'_adv'
     newpath1 = newpath+'\\'+filename+'.csv'    
     myfile=  open(newpath1, mode = 'w') # 'w' for writing 
     wr = csv.writer(myfile, delimiter=',', lineterminator='\r\n')
@@ -181,7 +192,7 @@ def get_boxscore( row, month):
     list = team2_csv_bas.split('\n')
     
     
-    filename = 'Game'+str(game)+'_'+str(date)+'_'+team2+'_bas'
+    filename = date+'_'+'Game'+str(game)+'_'+team2+'_bas'
     newpath1 = newpath+'\\'+filename+'.csv'    
     myfile=  open(newpath1, mode = 'w') # 'w' for writing 
     wr = csv.writer(myfile, delimiter=',', lineterminator='\r\n')
@@ -215,12 +226,14 @@ def get_boxscore( row, month):
     list = team2_csv_adv.split('\n')
     
     
-    filename = 'Game'+str(game)+'_'+str(date)+'_'+team2+'_adv'
+    filename = date+'_'+'Game'+str(game)+'_'+team2+'_adv'
     newpath1 = newpath+'\\'+filename+'.csv'      
     myfile=  open(newpath1, mode = 'w') # 'w' for writing 
     wr = csv.writer(myfile, delimiter=',', lineterminator='\r\n')
     wr.writerows( [x.split(',') for x in list] )
     myfile.close()
+          
+    # Wait pour pas se faire pécho ^^'
         
     time.sleep(round(rd.uniform(0.4,0.9) , 3))
     print( 'row ='+ind,'Game number '+str(game))
@@ -232,6 +245,7 @@ def get_boxscore( row, month):
 # Get boxscores for the entire month
 def get_boxscores( start, total, month):
     for i in range(start, total+1):
+        #driver.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS)
         get_boxscore( i , month)
     
     
@@ -260,6 +274,13 @@ def pick_year( year):    # 2016 for the season 15-16, 2015 for 14-15 # till 1977
     
     
 #################################################
+driver = webdriver.Chrome()
+driver.implicitly_wait(5) 
+
+
+url='http://www.basketball-reference.com/leagues'
+driver.get(url)
+
 
 game = 0 #game number initialisation
 
@@ -289,7 +310,7 @@ tillApril = nbmonth-2
 # 1st month games    
 #Create month folder
 month = driver.find_element_by_xpath('//*[@id="content"]/div[2]/div[1]/a').text
-newpath = path+'\\'+str(season)+'\\'+month
+newpath = path+'\\'+season+'\\'+month
 if not os.path.exists(newpath):
     os.makedirs(newpath)
         
@@ -298,10 +319,10 @@ nbrows = driver.find_elements_by_xpath('//*[@id="schedule"]/tbody/tr')
 nbrows = len(nbrows)  
         
 get_boxscores(1, nbrows, month)
-    
+driver.execute_script("window.scrollTo(0, 10);")    
         
 # Other months but April     
-for mois in range(4,tillApril):
+for mois in range(6,tillApril):
     m = str(mois)
     driver.implicitly_wait(4)
     
@@ -312,7 +333,7 @@ for mois in range(4,tillApril):
     if not os.path.exists(newpath):
         os.makedirs(newpath)
         
-    time.sleep(round(rd.uniform(0.4,1.5) , 3))
+    time.sleep(round(rd.uniform(0.4,1.2) , 3))
         
     month_xpath = '//*[@id="content"]/div[2]/div['+m+']/a'
     driver.find_element_by_xpath(month_xpath).click()
@@ -325,7 +346,7 @@ for mois in range(4,tillApril):
     
     driver.implicitly_wait(4)
     
-    driver.execute_script("window.scrollTo(0, 10);")
+    driver.execute_script("window.scrollTo(0, 10);") #back to top
 
 # April
 time.sleep(round(rd.uniform(0.6,1.2) , 3))
@@ -339,16 +360,16 @@ driver.find_element_by_xpath(april_xpath).click()
     
 driver.implicitly_wait(5)
 nbrows = driver.find_elements_by_xpath('//*[@id="schedule"]/tbody/tr')
-nbrows = len(nbrows)
+nbrows = print(len(nbrows))
     
 for row in range(1, nbrows + 1):
     try :
         if driver.find_element_by_xpath('//*[@id="schedule"]/tbody/tr['+str(row)+']/td[6]/a'):
-            get_boxscore( row , month = 'April' )
+            get_boxscore( row , 'April' )
 
         else:
             break
     except NoSuchElementException:
         break
         
-    
+ 
