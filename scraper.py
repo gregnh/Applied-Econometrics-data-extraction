@@ -40,21 +40,6 @@ from selenium.webdriver.common.action_chains import ActionChains
 from selenium.common.exceptions import NoSuchElementException
 
 
-
-####### PRECISION #######
-"""
-Une fois que tu as lancé l'algo, ne passe pas ta souris sur la nouvelle fenetre chrome.
-
-Sinon ca va fucked up le processus.
-
-Reduis là pour éviter ce risque.
-
-Puis attends.
-
-Dans le cas où tu as trainé ta souris sur dans la fenetre Chrome par inadvertence (orthographe?),
-CALL ME ILL EXPLAIN YOU
-"""
-
 ########## Functions ################
 
 
